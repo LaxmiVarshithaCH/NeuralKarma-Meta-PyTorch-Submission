@@ -115,13 +115,7 @@ EXPECTED_ACTIONS = {
 @app.on_event("startup")
 async def startup():
     init_db()
-    # Pre-load ML models
-    try:
-        scorer = get_scorer()
-        print("[OK] NeuralKarma ML models loaded")
-    except Exception as e:
-        print(f"[WARNING] Could not load ML models: {e}")
-        print("  Run `python run.py --setup` first to download data and train models.")
+    print("[INFO] App startup complete - models will load on first request")
 
 
 # ─── Frontend Route ──────────────────────────────────────
