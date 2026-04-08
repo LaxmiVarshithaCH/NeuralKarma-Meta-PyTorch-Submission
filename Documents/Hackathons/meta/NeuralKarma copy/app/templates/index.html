@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuralKarma — AI-Powered Ethical Impact Scoring Engine</title>
+    <meta name="description" content="Quantify the ethical impact of human actions across 5 dimensions using real AI models trained on 165K+ prosocial dialog examples from HuggingFace.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<div class="container">
+
+    <!-- ═══ Hero Section ═══ -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span class="pulse"></span>
+            Powered by Real AI Models · 165K+ Training Examples
+        </div>
+        <h1>NeuralKarma</h1>
+        <p class="subtitle">
+            AI-Powered Ethical Impact Scoring Engine — quantify the moral impact of actions
+            across 5 dimensions using ML models trained on real HuggingFace datasets.
+        </p>
+    </section>
+
+    <!-- ═══ Scoring Panel ═══ -->
+    <section class="scoring-panel" id="scoring-section">
+        <div class="card-header">
+            <div class="card-title">
+                
+                Score an Action
+            </div>
+            <div class="live-indicator">
+                <span class="live-dot" id="ws-indicator"></span>
+                <span id="ws-status">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <input type="text"
+                   id="username-input"
+                   class="text-input username-input"
+                   placeholder="Your name..."
+                   value="anonymous">
+            <textarea id="action-text"
+                      class="text-input"
+                      placeholder="Describe an action to score its ethical impact... (e.g., 'I volunteered at a homeless shelter this weekend' or 'I spread false rumors about my colleague')"></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.8rem;color:var(--text-muted)">
+                Analyzed by 6 ML classifiers trained on ProsocialDialog + ETHICS benchmark
+            </span>
+            <button id="score-btn" class="btn btn-primary"> Score Karma</button>
+        </div>
+    </section>
+
+    <!-- ═══ Result Display ═══ -->
+    <section id="result-container" class="result-container section">
+        <!-- Karma Score + Tier -->
+        <div class="karma-display">
+            <div class="karma-score-circle">
+                <span class="karma-score-value" id="karma-score-value">0</span>
+                <span class="karma-score-label">Karma</span>
+            </div>
+            <div class="karma-details">
+                <div class="karma-tier-badge" id="tier-badge">—</div>
+                <div class="karma-tier-label" id="tier-description">Score an action to see results</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidence-fill" style="width: 0%"></div>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px" id="confidence-text">
+                    0% confidence
+                </div>
+            </div>
+        </div>
+
+        <!-- 5-Axis Radar + List -->
+        <div class="card" style="margin-bottom:var(--space-lg)">
+            <div class="card-header">
+                <div class="card-title">
+                    
+                    5-Axis Ethical Breakdown
+                </div>
+            </div>
+            <div class="radar-container">
+                <div class="radar-chart-wrapper">
+                    <canvas id="radar-chart"></canvas>
+                </div>
+                <div class="axis-list" id="axis-list">
+                    <div class="empty-state" style="padding:20px">
+                        <p style="color:var(--text-muted)">Score an action to see axis breakdown</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ripple Effect -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    
+                    Ripple Effect Propagation
+                </div>
+            </div>
+
+            <div class="ripple-viz">
+                <div class="ripple-rings">
+                    <div class="ripple-center">YOU</div>
+                    <div class="ripple-ring"></div>
+                    <div class="ripple-ring"></div>
+                    <div class="ripple-ring"></div>
+                </div>
+
+                <div class="ripple-stats" style="margin-top:var(--space-lg)">
+                    <div class="ripple-stat">
+                        <div class="ripple-stat-value" id="ripple-impact">0</div>
+                        <div class="ripple-stat-label">Total Impact</div>
+                    </div>
+                    <div class="ripple-stat">
+                        <div class="ripple-stat-value" id="ripple-people">0</div>
+                        <div class="ripple-stat-label">People Reached</div>
+                    </div>
+                    <div class="ripple-stat">
+                        <div class="ripple-stat-value" id="ripple-damping">60%</div>
+                        <div class="ripple-stat-label">Damping Factor</div>
+                    </div>
+                </div>
+
+                <div id="ripple-hops" class="ripple-stats" style="margin-top:var(--space-md)"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Dashboard Grid ═══ -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <span></span>
+                System Dashboard
+            </h2>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-4" style="margin-bottom:var(--space-lg)">
+            <div class="card">
+                <div class="stat-value" id="stat-total-actions">0</div>
+                <div class="stat-label">Actions Scored</div>
+            </div>
+            <div class="card">
+                <div class="stat-value" id="stat-total-users">0</div>
+                <div class="stat-label">Users</div>
+            </div>
+            <div class="card">
+                <div class="stat-value" id="stat-avg-karma">50.0</div>
+                <div class="stat-label">Average Karma</div>
+            </div>
+            <div class="card">
+                <div class="stat-value" id="stat-ripple-impact">0</div>
+                <div class="stat-label">Total Ripple Impact</div>
+            </div>
+        </div>
+
+        <!-- Tier Distribution -->
+        <div class="card" style="margin-bottom:var(--space-lg)">
+            <div class="card-header">
+                <div class="card-title">
+                    
+                    Karma Tier Distribution
+                </div>
+            </div>
+            <div class="tier-bar" id="tier-bar">
+                <div class="tier-segment" style="flex:1;background:var(--bg-glass);color:var(--text-muted);font-size:0.8rem">
+                    Score actions to see distribution
+                </div>
+            </div>
+            <div class="tier-legend" style="margin-top:12px">
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#FFD700"></div>S: Enlightened</div>
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#00E5FF"></div>A: Virtuous</div>
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#69F0AE"></div>B: Benevolent</div>
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#B0BEC5"></div>C: Neutral</div>
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#FFB74D"></div>D: Questionable</div>
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#FF5252"></div>E: Harmful</div>
+                <div class="tier-legend-item"><div class="tier-legend-dot" style="background:#D50000"></div>F: Destructive</div>
+            </div>
+        </div>
+
+        <!-- Axis Averages -->
+        <div class="card" style="margin-bottom:var(--space-lg)">
+            <div class="card-header">
+                <div class="card-title">
+                    
+                    Global Axis Averages
+                </div>
+            </div>
+            <div id="axis-averages" class="axis-list">
+                <div class="empty-state" style="padding:20px">
+                    <p style="color:var(--text-muted)">Score actions to see global averages</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ Tabs: Leaderboard / History / Norms / Datasets ═══ -->
+    <section class="section">
+        <div class="tabs">
+            <button class="tab active" data-tab="leaderboard"> Leaderboard</button>
+            <button class="tab" data-tab="history"> History</button>
+            <button class="tab" data-tab="norms"> Social Norms</button>
+            <button class="tab" data-tab="datasets"> Datasets</button>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div class="tab-content active" data-tab-content="leaderboard">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        
+                        Karma Leaderboard
+                    </div>
+                </div>
+                <div id="leaderboard-list">
+                    <div class="empty-state">
+                        
+                        <p>No users yet. Score your first action!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="tab-content" data-tab-content="history">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        
+                        Karma History
+                    </div>
+                    <button id="load-history-btn" class="btn btn-secondary" style="padding:8px 16px;font-size:0.85rem">
+                        Load History
+                    </button>
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:var(--space-md)">
+                    Scores include temporal decay — older actions fade over time (half-life: 7 days).
+                </p>
+                <div class="timeline" id="history-timeline">
+                    <div class="empty-state">
+                        
+                        <p>Enter a username and score actions to see history</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Norms Tab -->
+        <div class="tab-content" data-tab-content="norms">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        
+                        Social Norms (Rules-of-Thumb)
+                    </div>
+                    <span style="font-size:0.8rem;color:var(--text-muted)" id="norms-total"></span>
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:var(--space-md)">
+                    Real moral norms extracted from ProsocialDialog — crowdworker-annotated rules of ethical behavior.
+                </p>
+                <input type="text"
+                       id="norms-search"
+                       class="text-input"
+                       placeholder="Search social norms... (e.g., 'honesty', 'help', 'respect')"
+                       style="margin-bottom:var(--space-md)">
+                <div id="norms-list">
+                    <div class="empty-state">
+                        
+                        <p>Loading social norms...</p>
+                    </div>
+                </div>
+                <div class="pagination">
+                    <button id="norms-prev" onclick="normsPageChange(-1)" disabled>← Prev</button>
+                    <span class="page-info" id="norms-page-info">Page 1 of 1</span>
+                    <button id="norms-next" onclick="normsPageChange(1)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datasets Tab -->
+        <div class="tab-content" data-tab-content="datasets">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        
+                        Real Datasets Used
+                    </div>
+                </div>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:var(--space-md)">
+                    NeuralKarma uses real, peer-reviewed datasets from HuggingFace — no synthetic or mock data.
+                </p>
+                <div class="grid grid-2" id="dataset-info">
+                    <div class="empty-state">
+                        <p style="color:var(--text-muted)">Loading dataset info...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ How It Works ═══ -->
+    <section class="section">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    
+                    How NeuralKarma Works
+                </div>
+            </div>
+            <div class="grid grid-3">
+                <div style="padding:var(--space-md)">
+                    <h3 style="color:var(--text-accent);margin-bottom:8px">1. Real Data</h3>
+                    <p style="font-size:0.9rem;color:var(--text-secondary)">
+                        Trained on <strong>165K+ real utterances</strong> from Allen AI's ProsocialDialog
+                        and Hendrycks' ETHICS benchmark — downloaded from HuggingFace.
+                    </p>
+                </div>
+                <div style="padding:var(--space-md)">
+                    <h3 style="color:#845EF7;margin-bottom:8px">2. ML Scoring</h3>
+                    <p style="font-size:0.9rem;color:var(--text-secondary)">
+                        <strong>6 trained classifiers</strong> (TF-IDF + Logistic Regression) score each input
+                        across Prosociality, Harm Avoidance, Fairness, Virtue, and Duty.
+                    </p>
+                </div>
+                <div style="padding:var(--space-md)">
+                    <h3 style="color:#E17055;margin-bottom:8px">3. Karma Physics</h3>
+                    <p style="font-size:0.9rem;color:var(--text-secondary)">
+                        Scores undergo <strong>temporal decay</strong> (e<sup>−λt</sup>, 7-day half-life)
+                        and <strong>ripple propagation</strong> through social networks.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <p>
+            NeuralKarma — Built with
+            <a href="https://huggingface.co/datasets/allenai/prosocial-dialog" target="_blank">ProsocialDialog</a> ·
+            <a href="https://arxiv.org/abs/2008.02275" target="_blank">ETHICS Benchmark</a> ·
+            FastAPI · scikit-learn · Chart.js
+        </p>
+        <p style="margin-top:4px;font-size:0.75rem">No mock data. All scores computed by real ML models.</p>
+    </div>
+</footer>
+
+<!-- App JS -->
+<script src="/static/app.js"></script>
+
+</body>
+</html>

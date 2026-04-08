@@ -1,0 +1,66 @@
+name: neuralkarma_env
+version: 1.0.0
+description: |
+  NeuralKarma Ethical Scoring Environment - A real-world environment where
+  agents learn to predict ethical impacts, classify moral dimensions, and optimize behavior.
+
+tasks:
+  - name: score_prediction
+    description: Predict the final NeuralKarma score (0-100) for a given situation.
+    difficulty: easy
+    evaluation_method: continuous_proximity
+    
+  - name: axis_classification
+    description: Identify the core ethical axis most impacted by an action.
+    difficulty: medium
+    evaluation_method: multi_class_accuracy
+    
+  - name: ethical_optimization
+    description: Rewrite a harmful action into a benevolent/prosocial one.
+    difficulty: hard
+    evaluation_method: model_scoring
+
+observation_space:
+  type: object
+  properties:
+    scenario:
+      type: string
+    task_type:
+      type: string
+      enum: [score_prediction, axis_classification, ethical_optimization]
+    progress:
+      type: number
+    metadata:
+      type: object
+
+action_space:
+  type: union
+  variants:
+    - score_prediction:
+        type: object
+        properties:
+          predicted_score:
+            type: number
+    - axis_classification:
+        type: object
+        properties:
+          primary_axis:
+            type: string
+            enum: [prosociality, harm_avoidance, fairness, virtue, duty]
+    - ethical_optimization:
+        type: object
+        properties:
+          rewritten_action:
+            type: string
+
+reward_range: [0, 1]
+
+metadata:
+  author: "Neural Karma Team"
+  created_at: "2024-03-20"
+  environment_type: "classification"
+  domain: "ethics"
+  tags:
+    - ethics
+    - moderation
+    - scoring

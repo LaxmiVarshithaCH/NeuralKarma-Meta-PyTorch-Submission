@@ -1,0 +1,16 @@
+{
+  "prosocial_dialog_done": true,
+  "prosocial_dialog_rows": 120236,
+  "ethics_commonsense_done": true,
+  "ethics_commonsense_rows": 13910,
+  "ethics_deontology_done": true,
+  "ethics_deontology_rows": 18164,
+  "ethics_justice_done": true,
+  "ethics_justice_rows": 21791,
+  "ethics_virtue_done": true,
+  "ethics_virtue_rows": 28245,
+  "ethics_utilitarianism_done": true,
+  "ethics_utilitarianism_rows": 13737,
+  "social_norms_done": true,
+  "social_norms_count": 116157
+}
